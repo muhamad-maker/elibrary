@@ -1,0 +1,23 @@
+# Dependencies
+**/node_modules/
+
+# Environment and secrets
+**/.env
+**/.env.*
+!**/.env.example
+
+# Build output and caches
+**/.next/
+**/out/
+**/build/
+**/dist/
+**/.turbo/
+**/*.tsbuildinfo
+
+# Logs and local tooling
+*.log
+.DS_Store
+.vscode/
+
+# Preserve nested repository metadata as a local backup only
+frontend/.git.frontend-backup/

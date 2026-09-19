@@ -1,0 +1,126 @@
+version: '3.8'
+
+services:
+  # -----------------------------------------------------
+  # 1. DATABASE: PostgreSQL
+  # -----------------------------------------------------
+  postgres:
+    image: postgres:15-alpine
+    container_name: elibrary_postgres
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-elibrary_admin}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-rahasia123}
+      POSTGRES_DB: ${POSTGRES_DB:-elibrary_db}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - elibrary_net
+
+  # -----------------------------------------------------
+  # 2. CACHE & QUEUE: Redis
+  # -----------------------------------------------------
+  redis:
+    image: redis:7-alpine
+    container_name: elibrary_redis
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - elibrary_net
+
+  # -----------------------------------------------------
+  # 3. SEARCH ENGINE: Meilisearch
+  # -----------------------------------------------------
+  meilisearch:
+    image: getmeili/meilisearch:v1.6
+    container_name: elibrary_meilisearch
+    restart: always
+    environment:
+      - MEILI_MASTER_KEY=${MEILI_MASTER_KEY:-masterKeyRahasia123}
+      - MEILI_ENV=development
+    ports:
+      - "7700:7700"
+    volumes:
+      - meilisearch_data:/meili_data
+    networks:
+      - elibrary_net
+
+  # -----------------------------------------------------
+  # 4. FILE STORAGE (E-Book & Multimedia): MinIO
+  # -----------------------------------------------------
+  minio:
+    image: minio/minio:latest
+    container_name: elibrary_minio
+    restart: always
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-admin}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-rahasia123}
+    ports:
+      - "9000:9000" # API Port
+      - "9001:9001" # Console/Web UI Port
+    volumes:
+      - minio_data:/data
+    networks:
+      - elibrary_net
+
+  # -----------------------------------------------------
+  # 5. BACKEND API (Node.js/NestJS) - Placeholder
+  # -----------------------------------------------------
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: elibrary_backend
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    environment:
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-elibrary_admin}:${POSTGRES_PASSWORD:-rahasia123}@postgres:5432/${POSTGRES_DB:-elibrary_db}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - MEILISEARCH_HOST=http://meilisearch:7700
+      - MEILISEARCH_KEY=${MEILI_MASTER_KEY:-masterKeyRahasia123}
+      - MINIO_ENDPOINT=minio
+      - MINIO_PORT=9000
+    depends_on:
+      - postgres
+      - redis
+      - meilisearch
+      - minio
+    networks:
+      - elibrary_net
+
+  # -----------------------------------------------------
+  # 6. FRONTEND (Next.js) - Placeholder
+  # -----------------------------------------------------
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: elibrary_frontend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:3001
+    depends_on:
+      - backend
+    networks:
+      - elibrary_net
+
+volumes:
+  postgres_data:
+  redis_data:
+  meilisearch_data:
+  minio_data:
+
+networks:
+  elibrary_net:
+    driver: bridge
+

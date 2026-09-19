@@ -1,0 +1,114 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ----------------------------------------------------
+// 1. PENGGUNA & KEANGGOTAAN (Fitur 4)
+// ----------------------------------------------------
+enum Role {
+  ADMIN
+  LIBRARIAN // Pustakawan
+  MEMBER    // Anggota / Siswa
+}
+
+model User {
+  id            String   @id @default(uuid())
+  email         String   @unique
+  password      String
+  name          String
+  role          Role     @default(MEMBER)
+  memberId      String?  @unique // Nomor Induk Siswa / ID Anggota
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  loans         Loan[]
+  reservations  Reservation[]
+}
+
+// ----------------------------------------------------
+// 2. KATALOG BUKU & MULTIMEDIA (Fitur 1, 2, 7)
+// ----------------------------------------------------
+enum ResourceType {
+  PHYSICAL_BOOK // Buku Fisik
+  EBOOK         // E-Book (PDF/EPUB)
+  JOURNAL       // Jurnal Ilmiah
+  MULTIMEDIA    // Video / Audio
+}
+
+model Book {
+  id              String       @id @default(uuid())
+  title           String
+  author          String
+  isbn            String?
+  publisher       String?
+  publicationYear Int?
+  description     String?
+  coverImage      String?      // URL ke gambar cover (MinIO)
+  fileUrl         String?      // URL file PDF/Video jika formatnya E-Book/Multimedia (MinIO)
+  resourceType    ResourceType @default(PHYSICAL_BOOK)
+  
+  stock           Int          @default(1)  // Total stok (Fitur 11)
+  availableStock  Int          @default(1)  // Stok yang tersedia saat ini
+  
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  categoryId      String?
+  category        Category?    @relation(fields: [categoryId], references: [id])
+
+  loans           Loan[]
+  reservations    Reservation[]
+}
+
+model Category {
+  id    String @id @default(uuid())
+  name  String @unique
+  books Book[]
+}
+
+// ----------------------------------------------------
+// 3. PEMINJAMAN & RESERVASI (Fitur 3)
+// ----------------------------------------------------
+enum LoanStatus {
+  BORROWED   // Sedang dipinjam
+  RETURNED   // Sudah dikembalikan
+  OVERDUE    // Terlambat
+}
+
+model Loan {
+  id          String     @id @default(uuid())
+  userId      String
+  bookId      String
+  loanDate    DateTime   @default(now())
+  dueDate     DateTime   // Tanggal jatuh tempo
+  returnDate  DateTime?  // Tanggal dikembalikan secara aktual
+  status      LoanStatus @default(BORROWED)
+  fineAmount  Float?     @default(0) // Denda jika ada
+
+  user        User       @relation(fields: [userId], references: [id])
+  book        Book       @relation(fields: [bookId], references: [id])
+}
+
+enum ReservationStatus {
+  PENDING    // Menunggu diambil
+  FULFILLED  // Sudah diambil dan menjadi Loan
+  CANCELLED  // Dibatalkan
+}
+
+model Reservation {
+  id               String            @id @default(uuid())
+  userId           String
+  bookId           String
+  reservationDate  DateTime          @default(now())
+  status           ReservationStatus @default(PENDING)
+
+  user             User              @relation(fields: [userId], references: [id])
+  book             Book              @relation(fields: [bookId], references: [id])
+}
+
