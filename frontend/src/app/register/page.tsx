@@ -1,8 +1,8 @@
 'use client';
 import { useState } from 'react';
-import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { api } from '@/lib/api';
 
 export default function Register() {
   const [name, setName] = useState('');
@@ -17,7 +17,7 @@ export default function Register() {
     setError('');
     
     try {
-      await axios.post('http://localhost:3001/api/auth/register', { 
+      await api.post('/api/auth/register', {
         name, email, password, memberId 
       });
       alert('Registrasi berhasil! Silakan login.');

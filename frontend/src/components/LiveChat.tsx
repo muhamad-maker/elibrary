@@ -12,7 +12,8 @@ export default function LiveChat() {
 
   useEffect(() => {
     // Inisialisasi koneksi Socket.io
-    socket = io('http://localhost:3001');
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || `${window.location.protocol}//${window.location.hostname}:3001`;
+    socket = io(apiUrl);
 
     socket.on('receiveMessage', (message) => {
       setMessages((prev) => [...prev, message]);

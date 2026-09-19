@@ -1,5 +1,6 @@
 import { Router, Request, Response } from 'express';
 import { PrismaClient, ResourceType } from '@prisma/client';
+import { requireAuth, requireStaff } from '../middleware/auth';
 
 const router = Router();
 const prisma = new PrismaClient();
@@ -46,7 +47,7 @@ router.get('/:id', async (req: Request, res: Response): Promise<void> => {
 });
 
 // Endpoint untuk menambahkan buku baru (Khusus Admin/Pustakawan)
-router.post('/', async (req: Request, res: Response) => {
+router.post('/', requireAuth, requireStaff, async (req: Request, res: Response) => {
   try {
     const { title, author, isbn, stock, resourceType, categoryId, description } = req.body;
     const newBook = await prisma.book.create({

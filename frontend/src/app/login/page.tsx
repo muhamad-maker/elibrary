@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
-import axios from 'axios';
 import { useRouter } from 'next/navigation';
+import { api } from '@/lib/api';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -14,12 +14,12 @@ export default function Login() {
     setError('');
     
     try {
-      const res = await axios.post('http://localhost:3001/api/auth/login', { email, password });
+      const res = await api.post('/api/auth/login', { email, password });
       // Simpan token (Untuk MVP kita simpan di localStorage dulu)
       localStorage.setItem('token', res.data.token);
       localStorage.setItem('user', JSON.stringify(res.data.user));
       alert('Login berhasil!');
-      router.push('/katalog');
+      router.push(res.data.user.role === 'ADMIN' || res.data.user.role === 'LIBRARIAN' ? '/admin' : '/katalog');
     } catch (err: any) {
       setError(err.response?.data?.error || 'Terjadi kesalahan saat login');
     }

@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import { api } from '@/lib/api';
 import { Search, Book as BookIcon } from 'lucide-react';
 
 interface Book {
@@ -19,7 +19,7 @@ export default function Katalog() {
   const fetchBooks = async () => {
     setLoading(true);
     try {
-      const res = await axios.get(`http://localhost:3001/api/books?search=${search}`);
+      const res = await api.get('/api/books', { params: { search } });
       setBooks(res.data);
     } catch (error) {
       console.error(error);

@@ -80,6 +80,7 @@ services:
       - "3001:3001"
     environment:
       - DATABASE_URL=postgresql://${POSTGRES_USER:-elibrary_admin}:${POSTGRES_PASSWORD:-rahasia123}@postgres:5432/${POSTGRES_DB:-elibrary_db}
+      - JWT_SECRET=${JWT_SECRET:-ganti_secret_jwt_produksi}
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - MEILISEARCH_HOST=http://meilisearch:7700
@@ -106,7 +107,7 @@ services:
     ports:
       - "3000:3000"
     environment:
-      - NEXT_PUBLIC_API_URL=http://localhost:3001
+      - NEXT_PUBLIC_API_URL=
     depends_on:
       - backend
     networks:
