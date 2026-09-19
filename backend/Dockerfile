@@ -1,20 +1,23 @@
 FROM node:20-alpine
 
+# Install openssl untuk Prisma
+RUN apk add --no-cache openssl
+
 WORKDIR /app
 
-# Install dependensi
-COPY package.json package-lock.json* ./
-RUN npm install
+# Copy package.json saja tanpa package-lock untuk menghindari konflik versi
+COPY package.json ./
 
-# Copy seluruh source code
+# Install ulang dengan npm v9 yang lebih stabil
+RUN npm install --legacy-peer-deps
+
+# Copy seluruh source code (termasuk prisma/schema.prisma)
 COPY . .
 
-# Generate Prisma Client & Build TypeScript
+# Generate Prisma Client
 RUN npx prisma generate
-RUN npm run build || npx tsc
 
 EXPOSE 3001
 
-# Jalankan migrasi dan server (Menggunakan npx ts-node atau node dist/index.js)
-# Karena ini TypeScript, kita bisa pakai ts-node untuk dev/testing yang cepat
-CMD npx prisma db push && npx ts-node src/index.ts
+# Jalankan migrasi database lalu jalankan server TypeScript
+CMD ["sh", "-c", "npx prisma db push --accept-data-loss && npx ts-node --transpile-only src/index.ts"]
