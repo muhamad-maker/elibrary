@@ -8,6 +8,7 @@ import authRoutes from './routes/auth';
 import bookRoutes from './routes/books';
 import loanRoutes from './routes/loans';
 import mediaRoutes from './routes/media';
+import adminRoutes from './routes/admin';
 
 dotenv.config();
 
@@ -45,6 +46,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/books', bookRoutes);
 app.use('/api/loans', loanRoutes);
 app.use('/api/media', mediaRoutes);
+app.use('/api/admin', adminRoutes);
 
 // Endpoint Berita Mock (Fitur 9)
 app.get('/api/news', (req: Request, res: Response) => {

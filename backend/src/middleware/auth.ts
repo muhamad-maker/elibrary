@@ -31,3 +31,12 @@ export function requireStaff(req: AuthenticatedRequest, res: Response, next: Nex
 
   next();
 }
+
+export function requireAdmin(req: AuthenticatedRequest, res: Response, next: NextFunction): void {
+  if (req.user?.role !== 'ADMIN') {
+    res.status(403).json({ error: 'Akses khusus administrator' });
+    return;
+  }
+
+  next();
+}
