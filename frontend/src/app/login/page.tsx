@@ -34,8 +34,8 @@ export default function Login() {
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
             Atau{' '}
-            <a href="#" className="font-medium text-blue-600 hover:text-blue-500">
-              daftar jika belum punya akun (Fitur menyusul)
+            <a href="/register" className="font-medium text-blue-600 hover:text-blue-500">
+              daftar jika belum punya akun
             </a>
           </p>
         </div>

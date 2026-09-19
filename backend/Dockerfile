@@ -1,9 +1,20 @@
-# Dockerfile sementara untuk Backend
-FROM node:20-alpine
-WORKDIR /app
-COPY package*.json ./
-RUN npm init -y && npm install express
-COPY . .
-EXPOSE 3001
-CMD ["node", "-e", "const express = require('express'); const app = express(); app.get('/', (req, res) => res.send('E-Library Backend API berjalan')); app.listen(3001, () => console.log('Backend berjalan di port 3001'));"]
+FROM node:18-alpine
 
+WORKDIR /app
+
+# Install dependensi
+COPY package.json package-lock.json* ./
+RUN npm install
+
+# Copy seluruh source code
+COPY . .
+
+# Generate Prisma Client & Build TypeScript
+RUN npx prisma generate
+RUN npm run build || npx tsc
+
+EXPOSE 3001
+
+# Jalankan migrasi dan server (Menggunakan npx ts-node atau node dist/index.js)
+# Karena ini TypeScript, kita bisa pakai ts-node untuk dev/testing yang cepat
+CMD npx prisma db push && npx ts-node src/index.ts
