@@ -1,5 +1,5 @@
 # Dockerfile sementara untuk Backend
-FROM node:18-alpine
+FROM node:20-alpine
 WORKDIR /app
 COPY package*.json ./
 RUN npm init -y && npm install express
