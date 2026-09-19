@@ -60,7 +60,7 @@ services:
       MINIO_ROOT_USER: ${MINIO_ROOT_USER:-admin}
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-rahasia123}
     ports:
-      - "9000:9000" # API Port
+      - "9002:9000" # API Port diganti ke 9002 karena 9000 sudah terpakai di komputer Anda
       - "9001:9001" # Console/Web UI Port
     volumes:
       - minio_data:/data
